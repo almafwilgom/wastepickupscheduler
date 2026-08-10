@@ -1,4 +1,4 @@
-const API_BASE_URL = '/api';
+const API_BASE_URL = 'https://wastepickupschedulerapi.onrender.com/api';
 
 /**
  * Helper to fetch data with automatic Authorization header handling.
