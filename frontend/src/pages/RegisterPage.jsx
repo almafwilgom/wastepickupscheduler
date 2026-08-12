@@ -9,7 +9,6 @@ export default function RegisterPage({ setCurrentTab }) {
     name: '',
     email: '',
     password: '',
-    role: 'RESIDENT',
     phone: '',
     street: '',
     city: '',
@@ -28,7 +27,6 @@ export default function RegisterPage({ setCurrentTab }) {
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        role: formData.role,
         phone: formData.phone,
         address: { street: formData.street, city: formData.city, postalCode: formData.postalCode },
       };
@@ -66,30 +64,6 @@ export default function RegisterPage({ setCurrentTab }) {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Role Selector */}
-          <div>
-            <label className={labelClass}>Account Role</label>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { role: 'RESIDENT', label: 'Resident' },
-                { role: 'COLLECTOR', label: 'Collector Driver' },
-                { role: 'ADMIN', label: 'Admin Dispatch' },
-              ].map((item) => (
-                <button
-                  type="button"
-                  key={item.role}
-                  onClick={() => setFormData({ ...formData, role: item.role })}
-                  className={`py-2 px-2 text-xs font-bold rounded-lg border transition-all ${formData.role === item.role
-                      ? 'bg-eco-500/20 text-eco-600 dark:text-eco-400 border-eco-500'
-                      : 'bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-700'
-                    }`}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Name & Email */}
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
