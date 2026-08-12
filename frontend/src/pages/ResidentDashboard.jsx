@@ -6,7 +6,7 @@ import PickupCard from '../components/PickupCard';
 import { 
   Calendar, RefreshCw, CheckCircle2, Clock, Trash2, 
   Sparkles, Leaf, PlusCircle, ArrowRight, User, Phone, MapPin, 
-  ShieldAlert, Settings, Bell, Circle, Truck, Navigation, Check
+  ShieldAlert, Settings, Bell, Circle, Truck, Navigation, Check, CheckCheck
 } from 'lucide-react';
 
 /**
@@ -168,6 +168,26 @@ export default function ResidentDashboard() {
       setNotifications(res.notifications || []);
     } catch (err) {
       console.warn(err);
+    }
+  };
+
+  const handleMarkNotificationRead = async (id) => {
+    try {
+      await apiRequest(`/notifications/${id}/read`, 'PUT', null, token);
+      setNotifications(prev => prev.map(n => (n._id === id ? { ...n, isRead: true } : n)));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleMarkAllNotificationsRead = async () => {
+    try {
+      await apiRequest('/notifications/read-all', 'PUT', null, token);
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      setSuccessToast('All notifications marked as read');
+      setTimeout(() => setSuccessToast(''), 3000);
+    } catch (err) {
+      alert(`Failed to mark all as read: ${err.message}`);
     }
   };
 
@@ -519,28 +539,46 @@ export default function ResidentDashboard() {
       {/* NOTIFICATIONS TIMELINE SUB-VIEW */}
       {activeTab === 'notifications' && (
         <div className="max-w-2xl mx-auto space-y-6 text-left">
-          <div>
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white">Notifications Alert Manifest</h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Review alerts, updates and schedule assignments.</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-black text-slate-900 dark:text-white">Notifications & Alerts</h1>
+              <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Review alerts, updates, and schedule assignments.</p>
+            </div>
+            {notifications.some(n => !n.isRead) && (
+              <button
+                onClick={handleMarkAllNotificationsRead}
+                className="px-4 py-2.5 rounded-2xl bg-green-600 hover:bg-green-500 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5"
+              >
+                <CheckCheck className="w-4 h-4" /> Mark All as Read
+              </button>
+            )}
           </div>
 
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
             <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
               {notifications.length === 0 ? (
-                <div className="py-12 text-center text-slate-450 text-xs">No alerts matching notifications database</div>
+                <div className="py-12 text-center text-slate-400 text-xs">No notifications yet</div>
               ) : (
                 notifications.map((n) => (
-                  <div key={n._id} className="py-4 flex gap-4">
-                    <div className="w-9 h-9 shrink-0 rounded-xl bg-green-50 dark:bg-green-950/30 flex items-center justify-center text-green-600">
-                      <Bell className="w-4.5 h-4.5" />
+                  <div
+                    key={n._id}
+                    onClick={() => handleMarkNotificationRead(n._id)}
+                    className={`py-4 flex gap-4 cursor-pointer transition-colors p-3 rounded-2xl ${n.isRead ? 'opacity-70 hover:bg-slate-50 dark:hover:bg-slate-850' : 'bg-green-50/50 dark:bg-green-950/20 hover:bg-green-50 dark:hover:bg-green-950/30'}`}
+                  >
+                    <div className="w-9 h-9 shrink-0 rounded-full bg-green-100 dark:bg-green-950/40 border border-green-200 dark:border-green-800 flex items-center justify-center text-green-600 dark:text-green-400">
+                      <Bell className="w-4 h-4" />
                     </div>
-                    <div className="space-y-1">
-                      <p className="text-sm text-slate-800 dark:text-slate-200 font-medium">{n.message}</p>
-                      <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold">
-                        <span>{new Date(n.createdAt).toLocaleDateString()}</span>
+                    <div className="space-y-1 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className={`text-sm ${n.isRead ? 'text-slate-700 dark:text-slate-300 font-normal' : 'text-slate-900 dark:text-white font-bold'}`}>
+                          {n.message}
+                        </p>
                         {!n.isRead && (
-                          <span className="bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400 px-1.5 py-0.5 rounded font-black uppercase text-[8px]">Unread</span>
+                          <span className="bg-green-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shrink-0">NEW</span>
                         )}
+                      </div>
+                      <div className="text-[10px] text-slate-400 font-bold">
+                        {new Date(n.createdAt).toLocaleString()}
                       </div>
                     </div>
                   </div>

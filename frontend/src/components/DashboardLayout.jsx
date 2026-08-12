@@ -4,7 +4,7 @@ import { useTheme } from '../context/ThemeContext';
 import { apiRequest } from '../services/api';
 import { 
   LayoutDashboard, Calendar, List, Bell, User, Settings, 
-  LogOut, Menu, Search, X, Shield, Truck, Sparkles, Sun, Moon 
+  LogOut, Menu, Search, X, Shield, Truck, Sparkles, Sun, Moon, CheckCheck 
 } from 'lucide-react';
 
 export default function DashboardLayout({ children, activeTab, setActiveTab }) {
@@ -28,16 +28,25 @@ export default function DashboardLayout({ children, activeTab, setActiveTab }) {
 
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 20000); // Poll every 20s
+    const interval = setInterval(fetchNotifications, 15000); // Poll every 15s
     return () => clearInterval(interval);
   }, [token]);
 
   const handleMarkAsRead = async (id) => {
     try {
       await apiRequest(`/notifications/${id}/read`, 'PUT', null, token);
-      fetchNotifications();
+      setNotifications(prev => prev.map(n => (n._id === id ? { ...n, isRead: true } : n)));
     } catch (err) {
-      console.error(err);
+      console.error('Failed to mark notification as read:', err);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await apiRequest('/notifications/read-all', 'PUT', null, token);
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    } catch (err) {
+      console.error('Failed to mark all as read:', err);
     }
   };
 
@@ -65,9 +74,9 @@ export default function DashboardLayout({ children, activeTab, setActiveTab }) {
       
       {/* 1. Sidebar for Desktop */}
       <aside className="hidden lg:flex flex-col w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shrink-0">
-        {/* Brand logo header */}
+        {/* Brand logo header with circular logo */}
         <div className="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-800 gap-3">
-          <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
+          <img src="/logo.png" alt="Logo" className="w-9 h-9 object-contain rounded-full border border-green-500/20 shadow-sm" />
           <div className="leading-tight text-left">
             <span className="font-extrabold text-sm uppercase tracking-wider text-green-700 dark:text-green-400 block">
               Waste Pickup
@@ -137,7 +146,7 @@ export default function DashboardLayout({ children, activeTab, setActiveTab }) {
           <aside className="relative flex flex-col w-64 bg-white dark:bg-slate-900 h-full shadow-2xl z-10 border-r border-slate-200 dark:border-slate-800 animate-slide-in">
             <div className="h-16 flex items-center justify-between px-6 border-b border-slate-200 dark:border-slate-800">
               <div className="flex items-center gap-2.5">
-                <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
+                <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain rounded-full border border-green-500/20" />
                 <div className="leading-tight text-left">
                   <span className="font-extrabold text-sm uppercase tracking-wider text-green-700 dark:text-green-400 block">
                     Waste Pickup
@@ -250,13 +259,24 @@ export default function DashboardLayout({ children, activeTab, setActiveTab }) {
                   <div className="fixed inset-0 z-40" onClick={() => setIsNotificationOpen(false)} />
                   <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 py-3 overflow-hidden text-left animate-fade-in">
                     <div className="px-4 pb-2 border-b border-slate-150 dark:border-slate-800 flex items-center justify-between">
-                      <span className="font-bold text-xs">Recent Alerts</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-xs">Recent Alerts</span>
+                        {unreadCount > 0 && (
+                          <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">
+                            {unreadCount} Unread
+                          </span>
+                        )}
+                      </div>
                       {unreadCount > 0 && (
-                        <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">
-                          {unreadCount} Unread
-                        </span>
+                        <button
+                          onClick={handleMarkAllAsRead}
+                          className="text-[11px] font-bold text-green-600 dark:text-green-400 hover:underline flex items-center gap-1"
+                        >
+                          <CheckCheck className="w-3.5 h-3.5" /> Mark All Read
+                        </button>
                       )}
                     </div>
+
                     <div className="max-h-60 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/50">
                       {notifications.length === 0 ? (
                         <div className="py-8 text-center text-xs text-slate-400">No notifications</div>
@@ -264,10 +284,17 @@ export default function DashboardLayout({ children, activeTab, setActiveTab }) {
                         notifications.slice(0, 5).map((n) => (
                           <div 
                             key={n._id} 
-                            onClick={() => { handleMarkAsRead(n._id); }}
-                            className={`p-3 text-xs transition-colors cursor-pointer ${n.isRead ? 'opacity-70 hover:bg-slate-50 dark:hover:bg-slate-800/30' : 'bg-green-50/50 dark:bg-green-950/10 hover:bg-green-50 dark:hover:bg-green-950/20 font-medium'}`}
+                            onClick={() => {
+                              handleMarkAsRead(n._id);
+                            }}
+                            className={`p-3 text-xs transition-colors cursor-pointer ${n.isRead ? 'opacity-60 hover:bg-slate-50 dark:hover:bg-slate-800/30' : 'bg-green-50/50 dark:bg-green-950/10 hover:bg-green-50 dark:hover:bg-green-950/20 font-semibold'}`}
                           >
-                            <div className="text-slate-800 dark:text-slate-200">{n.message}</div>
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-slate-800 dark:text-slate-200">{n.message}</span>
+                              {!n.isRead && (
+                                <span className="text-[9px] bg-green-600 text-white font-bold px-1.5 py-0.5 rounded-full shrink-0">NEW</span>
+                              )}
+                            </div>
                             <div className="text-[10px] text-slate-400 mt-1">{new Date(n.createdAt).toLocaleDateString()}</div>
                           </div>
                         ))

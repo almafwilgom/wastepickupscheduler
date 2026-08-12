@@ -148,7 +148,7 @@ export default function AdminDashboard() {
                 <ShieldCheck className="w-3.5 h-3.5" /> Dispatch Operations Console
               </div>
               <h1 className="text-2xl font-black text-slate-900 dark:text-white leading-tight">
-                Municipal Logistics Dispatch Portal
+                Waste Pickup Scheduler
               </h1>
               <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
                 Monitor metrics, manage collectors, and assign route stops to active collectors.

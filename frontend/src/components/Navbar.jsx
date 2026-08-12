@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { apiRequest } from '../services/api';
-import { LogOut, Bell, Sun, Moon, LayoutDashboard, Truck, ShieldCheck, Menu, X } from 'lucide-react';
+import { LogOut, Bell, Sun, Moon, LayoutDashboard, Truck, ShieldCheck, Menu, X, CheckCheck } from 'lucide-react';
 
 export default function Navbar({ currentTab, setCurrentTab }) {
   const { user, token, logout } = useAuth();
@@ -49,6 +49,26 @@ export default function Navbar({ currentTab, setCurrentTab }) {
   const toggleBellDropdown = () => setIsBellOpen((value) => !value);
   const closeBellDropdown = () => setIsBellOpen(false);
 
+  const handleMarkAsRead = async (id) => {
+    try {
+      await apiRequest(`/notifications/${id}/read`, 'PUT', null, token);
+      setNotifications(prev => prev.map(n => (n._id === id ? { ...n, isRead: true } : n)));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await apiRequest('/notifications/read-all', 'PUT', null, token);
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      setUnreadCount(0);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const navLinks = [
     { label: 'Home', tab: 'landing' },
     { label: 'About Us', tab: 'about' },
@@ -59,7 +79,7 @@ export default function Navbar({ currentTab, setCurrentTab }) {
     <header className="sticky top-0 z-40 w-full border-b border-slate-200 dark:border-slate-700 bg-green-50/95 dark:bg-slate-800/95 backdrop-blur-md transition-colors duration-300 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
 
-        {/* Brand Logo */}
+        {/* Brand Logo with Circular Image */}
         <div
           onClick={() => setCurrentTab('landing')}
           className="flex items-center gap-2.5 cursor-pointer shrink-0"
@@ -67,9 +87,9 @@ export default function Navbar({ currentTab, setCurrentTab }) {
           <img
             src="/logo.png"
             alt="Waste Pickup Scheduler Logo"
-            className="h-10 w-10 object-contain"
+            className="h-10 w-10 object-contain rounded-full border border-green-500/20 shadow-sm"
           />
-          <div className="leading-tight">
+          <div className="leading-tight text-left">
             <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-slate-100 block leading-none uppercase">
               Waste Pickup
             </span>
@@ -79,7 +99,7 @@ export default function Navbar({ currentTab, setCurrentTab }) {
           </div>
         </div>
 
-        {/* Center Nav Links (hidden on small screens unless toggled) */}
+        {/* Center Nav Links */}
         {!user && (
           <nav className="hidden md:flex items-center gap-6">
             {navLinks.map((link) => (
@@ -127,11 +147,19 @@ export default function Navbar({ currentTab, setCurrentTab }) {
               </button>
 
               {isBellOpen && (
-                <div className="absolute right-0 mt-3 w-80 max-w-xs rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xl shadow-slate-900/10 z-50">
-                  <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 text-sm font-semibold text-slate-900 dark:text-slate-100">
-                    Notifications
+                <div className="absolute right-0 mt-3 w-80 max-w-xs rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xl shadow-slate-900/10 z-50 overflow-hidden text-left">
+                  <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <span className="text-sm font-bold text-slate-900 dark:text-slate-100">Notifications</span>
+                    {unreadCount > 0 && (
+                      <button
+                        onClick={handleMarkAllAsRead}
+                        className="text-xs font-bold text-green-600 dark:text-green-400 hover:underline flex items-center gap-1"
+                      >
+                        <CheckCheck className="w-3.5 h-3.5" /> Mark All Read
+                      </button>
+                    )}
                   </div>
-                  <div className="max-h-72 overflow-y-auto">
+                  <div className="max-h-72 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/50">
                     {notifications.length === 0 ? (
                       <div className="px-4 py-5 text-center text-sm text-slate-500 dark:text-slate-400">
                         No notifications yet
@@ -140,23 +168,26 @@ export default function Navbar({ currentTab, setCurrentTab }) {
                       notifications.slice(0, 5).map((notification) => (
                         <div
                           key={notification._id || notification.id}
-                          className="px-4 py-3 border-b last:border-b-0 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 cursor-pointer"
-                          onClick={() => {
+                          className={`px-4 py-3 cursor-pointer transition-colors ${notification.isRead ? 'opacity-60 hover:bg-slate-50 dark:hover:bg-slate-900' : 'bg-green-50/50 dark:bg-green-950/20 hover:bg-green-50 dark:hover:bg-green-950/30'}`}
+                          onClick={async () => {
+                            if (!notification.isRead) {
+                              await handleMarkAsRead(notification._id || notification.id);
+                            }
                             closeBellDropdown();
                             setCurrentTab('dashboard');
                           }}
                         >
                           <div className="flex items-start justify-between gap-3">
-                            <p className={`text-sm leading-6 ${notification.isRead ? 'text-slate-500 dark:text-slate-400' : 'text-slate-900 dark:text-slate-100 font-semibold'}`}>
+                            <p className={`text-xs leading-5 ${notification.isRead ? 'text-slate-500 dark:text-slate-400 font-normal' : 'text-slate-900 dark:text-slate-100 font-semibold'}`}>
                               {notification.message || notification.title || 'New notification'}
                             </p>
                             {!notification.isRead && (
-                              <span className="inline-flex items-center justify-center rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-semibold text-white">
-                                New
+                              <span className="inline-flex items-center justify-center rounded-full bg-rose-500 px-1.5 py-0.5 text-[9px] font-bold text-white shrink-0">
+                                NEW
                               </span>
                             )}
                           </div>
-                          <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                          <p className="mt-1 text-[10px] text-slate-400">
                             {new Date(notification.createdAt || notification.date || Date.now()).toLocaleString()}
                           </p>
                         </div>
@@ -168,7 +199,7 @@ export default function Navbar({ currentTab, setCurrentTab }) {
                       closeBellDropdown();
                       setCurrentTab('dashboard');
                     }}
-                    className="w-full px-4 py-3 text-sm font-semibold text-center text-green-700 dark:text-green-300 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all"
+                    className="w-full px-4 py-3 text-xs font-bold text-center text-green-700 dark:text-green-400 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all border-t border-slate-200 dark:border-slate-800"
                   >
                     View all notifications
                   </button>
