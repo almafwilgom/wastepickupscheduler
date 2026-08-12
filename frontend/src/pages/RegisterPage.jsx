@@ -126,9 +126,10 @@ export default function RegisterPage({ setCurrentTab }) {
                 <Phone className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
+                  required
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="+1 (555) 019-2834"
+                  placeholder="+2348012345678"
                   className={`${inputClass} pl-9 pr-3`}
                 />
               </div>
@@ -141,21 +142,24 @@ export default function RegisterPage({ setCurrentTab }) {
             <div className="grid grid-cols-3 gap-2">
               <input
                 type="text"
-                placeholder="123 Eco Way"
+                required
+                placeholder="123 Main Street"
                 value={formData.street}
                 onChange={(e) => setFormData({ ...formData, street: e.target.value })}
                 className={`col-span-1 px-3 ${inputClass}`}
               />
               <input
                 type="text"
-                placeholder="Greenfield"
+                required
+                placeholder="Jos"
                 value={formData.city}
                 onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                 className={`col-span-1 px-3 ${inputClass}`}
               />
               <input
                 type="text"
-                placeholder="90210"
+                required
+                placeholder="930001"
                 value={formData.postalCode}
                 onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
                 className={`col-span-1 px-3 ${inputClass}`}
