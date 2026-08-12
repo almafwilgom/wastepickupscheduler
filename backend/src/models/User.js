@@ -34,6 +34,32 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    // Collector specific fields
+    vehicleType: {
+      type: String,
+      default: '',
+    },
+    vehicleNumber: {
+      type: String,
+      default: '',
+    },
+    assignedArea: {
+      type: String,
+      default: '',
+    },
+    availabilityStatus: {
+      type: String,
+      enum: ['AVAILABLE', 'BUSY', 'OFF_DUTY'],
+      default: 'AVAILABLE',
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+    mustChangePassword: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

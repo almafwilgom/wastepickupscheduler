@@ -19,6 +19,15 @@ const notificationSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    pickupId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'PickupRequest',
+      default: null,
+    },
+    type: {
+      type: String,
+      default: 'INFO',
+    },
   },
   {
     timestamps: true,

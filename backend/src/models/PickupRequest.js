@@ -28,7 +28,17 @@ const pickupRequestSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['PENDING', 'SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'],
+      enum: [
+        'PENDING',
+        'ASSIGNED',
+        'ACCEPTED',
+        'SCHEDULED',
+        'IN_PROGRESS',
+        'ON_THE_WAY',
+        'COLLECTED',
+        'COMPLETED',
+        'CANCELLED',
+      ],
       default: 'PENDING',
     },
     collector: {
@@ -40,6 +50,16 @@ const pickupRequestSchema = new mongoose.Schema(
       type: String,
       trim: true,
       default: '',
+    },
+    assignedAt: { type: Date, default: null },
+    acceptedAt: { type: Date, default: null },
+    startedAt: { type: Date, default: null },
+    collectedAt: { type: Date, default: null },
+    completedAt: { type: Date, default: null },
+    smsStatus: {
+      type: String,
+      enum: ['NOT_SENT', 'PENDING', 'SENT', 'FAILED'],
+      default: 'NOT_SENT',
     },
   },
   {

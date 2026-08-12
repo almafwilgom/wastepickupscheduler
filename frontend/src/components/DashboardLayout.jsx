@@ -47,6 +47,7 @@ export default function DashboardLayout({ children, activeTab, setActiveTab }) {
     { id: 'overview', label: 'Overview', icon: LayoutDashboard, roles: ['RESIDENT', 'COLLECTOR', 'ADMIN'] },
     { id: 'schedule', label: 'Schedule Pickup', icon: Calendar, roles: ['RESIDENT'] },
     { id: 'requests', label: user?.role === 'RESIDENT' ? 'My Requests' : user?.role === 'COLLECTOR' ? 'My Route' : 'Dispatch Queue', icon: List, roles: ['RESIDENT', 'COLLECTOR', 'ADMIN'] },
+    { id: 'collectors', label: 'Collectors', icon: Truck, roles: ['ADMIN'] },
     { id: 'notifications', label: 'Notifications', icon: Bell, roles: ['RESIDENT', 'COLLECTOR', 'ADMIN'], badge: unreadCount > 0 ? unreadCount : null },
     { id: 'profile', label: 'Profile', icon: User, roles: ['RESIDENT', 'COLLECTOR', 'ADMIN'] },
     { id: 'settings', label: 'Settings', icon: Settings, roles: ['RESIDENT', 'COLLECTOR', 'ADMIN'] },
