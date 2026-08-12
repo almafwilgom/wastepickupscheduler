@@ -79,11 +79,10 @@ export default function RegisterPage({ setCurrentTab }) {
                   type="button"
                   key={item.role}
                   onClick={() => setFormData({ ...formData, role: item.role })}
-                  className={`py-2 px-2 text-xs font-bold rounded-lg border transition-all ${
-                    formData.role === item.role
+                  className={`py-2 px-2 text-xs font-bold rounded-lg border transition-all ${formData.role === item.role
                       ? 'bg-eco-500/20 text-eco-600 dark:text-eco-400 border-eco-500'
                       : 'bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-700'
-                  }`}
+                    }`}
                 >
                   {item.label}
                 </button>
