@@ -11,6 +11,7 @@ import CollectorDashboard from './pages/CollectorDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
+import ServicesPage from './pages/ServicesPage';
 
 function MainContent() {
   const { user, loading } = useAuth();
@@ -20,7 +21,7 @@ function MainContent() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 text-sm transition-colors duration-300">
         <div className="flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-eco-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
           <span>Initializing Waste Pickup Scheduler...</span>
         </div>
       </div>
@@ -31,6 +32,7 @@ function MainContent() {
     if (currentTab === 'login') return <LoginPage setCurrentTab={setCurrentTab} />;
     if (currentTab === 'register') return <RegisterPage setCurrentTab={setCurrentTab} />;
     if (currentTab === 'about') return <AboutPage />;
+    if (currentTab === 'services') return <ServicesPage setCurrentTab={setCurrentTab} />;
     if (currentTab === 'contact') return <ContactPage />;
 
     if (currentTab === 'dashboard') {

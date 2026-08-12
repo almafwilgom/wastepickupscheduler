@@ -71,6 +71,7 @@ export default function Navbar({ currentTab, setCurrentTab }) {
 
   const navLinks = [
     { label: 'Home', tab: 'landing' },
+    { label: 'Services', tab: 'services' },
     { label: 'About Us', tab: 'about' },
     { label: 'Contact', tab: 'contact' },
   ];
