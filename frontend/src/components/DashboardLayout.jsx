@@ -7,6 +7,8 @@ import {
   LogOut, Menu, Search, X, Shield, Truck, Sparkles, Sun, Moon, CheckCheck 
 } from 'lucide-react';
 
+import { triggerPushNotification } from '../utils/pushNotification';
+
 export default function DashboardLayout({ children, activeTab, setActiveTab }) {
   const { user, logout, token } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -14,13 +16,24 @@ export default function DashboardLayout({ children, activeTab, setActiveTab }) {
   const [notifications, setNotifications] = useState([]);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [lastNotifiedId, setLastNotifiedId] = useState(null);
 
   // Fetch notifications for the top bar bell
   const fetchNotifications = async () => {
     if (!token) return;
     try {
       const res = await apiRequest('/notifications', 'GET', null, token);
-      setNotifications(res.notifications || []);
+      const list = res.notifications || [];
+      setNotifications(list);
+
+      const latestUnread = list.find((n) => !n.isRead);
+      if (latestUnread && latestUnread._id !== lastNotifiedId) {
+        setLastNotifiedId(latestUnread._id);
+        triggerPushNotification(
+          latestUnread.title || '🚛 Waste Pickup Notification',
+          latestUnread.message || 'You have a new update regarding your waste pickup.'
+        );
+      }
     } catch (err) {
       console.warn('Failed to load notifications in topbar:', err.message);
     }
@@ -117,8 +130,12 @@ export default function DashboardLayout({ children, activeTab, setActiveTab }) {
         {/* Sidebar Footer User Section */}
         <div className="p-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
           <div className="flex items-center gap-3 px-2">
-            <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800 flex items-center justify-center font-bold text-green-700 dark:text-green-400 text-sm">
-              {user?.name?.slice(0, 2).toUpperCase() || 'US'}
+            <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 flex items-center justify-center font-bold text-sm overflow-hidden shrink-0">
+              {user?.avatar ? (
+                <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+              ) : (
+                user?.name?.slice(0, 2).toUpperCase() || 'US'
+              )}
             </div>
             <div className="text-left min-w-0 flex-1">
               <div className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{user?.name}</div>
@@ -317,9 +334,13 @@ export default function DashboardLayout({ children, activeTab, setActiveTab }) {
             <div className="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-800">
               <div 
                 onClick={() => setActiveTab('profile')}
-                className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 flex items-center justify-center font-bold text-xs cursor-pointer hover:opacity-80 transition-opacity"
+                className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 flex items-center justify-center font-bold text-xs cursor-pointer hover:opacity-80 transition-opacity overflow-hidden shrink-0"
               >
-                {user?.name?.slice(0, 1).toUpperCase()}
+                {user?.avatar ? (
+                  <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                ) : (
+                  user?.name?.slice(0, 1).toUpperCase()
+                )}
               </div>
             </div>
           </div>

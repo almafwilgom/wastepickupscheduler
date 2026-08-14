@@ -100,6 +100,7 @@ export const loginUser = async (req, res) => {
         role: user.role,
         address: user.address,
         phone: user.phone,
+        avatar: user.avatar || '',
         vehicleType: user.vehicleType,
         vehicleNumber: user.vehicleNumber,
         assignedArea: user.assignedArea,
@@ -266,5 +267,62 @@ export const updateCollector = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: 'Failed to update collector', error: error.message });
+  }
+};
+
+/**
+ * Update authenticated user profile and picture avatar
+ * Endpoint: PUT /api/auth/profile
+ */
+export const updateProfile = async (req, res) => {
+  try {
+    const { name, phone, address, avatar, vehicleType, vehicleNumber, assignedArea } = req.body;
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User profile not found' });
+    }
+
+    if (name !== undefined) user.name = name;
+    if (phone !== undefined) user.phone = phone;
+    if (avatar !== undefined) user.avatar = avatar;
+    if (vehicleType !== undefined) user.vehicleType = vehicleType;
+    if (vehicleNumber !== undefined) user.vehicleNumber = vehicleNumber;
+    if (assignedArea !== undefined) user.assignedArea = assignedArea;
+
+    if (address && typeof address === 'object') {
+      user.address = {
+        street: address.street !== undefined ? address.street : user.address?.street || '',
+        city: address.city !== undefined ? address.city : user.address?.city || '',
+        postalCode: address.postalCode !== undefined ? address.postalCode : user.address?.postalCode || '',
+      };
+    }
+
+    await user.save();
+
+    const updatedUser = user.toObject();
+    delete updatedUser.password;
+
+    return res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully',
+      user: {
+        id: updatedUser._id,
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        address: updatedUser.address,
+        phone: updatedUser.phone,
+        avatar: updatedUser.avatar,
+        vehicleType: updatedUser.vehicleType,
+        vehicleNumber: updatedUser.vehicleNumber,
+        assignedArea: updatedUser.assignedArea,
+        availabilityStatus: updatedUser.availabilityStatus,
+        mustChangePassword: updatedUser.mustChangePassword,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Failed to update profile', error: error.message });
   }
 };

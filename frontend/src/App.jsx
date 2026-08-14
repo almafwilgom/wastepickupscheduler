@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import LandingPage from './pages/LandingPage';
@@ -12,10 +12,55 @@ import AdminDashboard from './pages/AdminDashboard';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import ServicesPage from './pages/ServicesPage';
+import { requestPushNotificationPermission } from './utils/pushNotification';
 
 function MainContent() {
   const { user, loading } = useAuth();
-  const [currentTab, setCurrentTab] = useState('landing');
+  
+  // Initialize route tab from URL hash or localStorage so refresh maintains page!
+  const getInitialTab = () => {
+    const hash = window.location.hash.replace('#', '').trim();
+    const validTabs = ['landing', 'about', 'services', 'contact', 'login', 'register', 'dashboard'];
+    if (hash && validTabs.includes(hash)) return hash;
+    const stored = localStorage.getItem('wps_active_tab');
+    if (stored && validTabs.includes(stored)) return stored;
+    return user ? 'dashboard' : 'landing';
+  };
+
+  const [currentTab, setCurrentTabState] = useState(getInitialTab);
+
+  const setCurrentTab = (tab) => {
+    setCurrentTabState(tab);
+    window.location.hash = `#${tab}`;
+    localStorage.setItem('wps_active_tab', tab);
+  };
+
+  // Request push notification permissions on mount
+  useEffect(() => {
+    requestPushNotificationPermission();
+  }, []);
+
+  // Listen for browser back/forward and hash changes
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '').trim();
+      const validTabs = ['landing', 'about', 'services', 'contact', 'login', 'register', 'dashboard'];
+      if (hash && validTabs.includes(hash)) {
+        setCurrentTabState(hash);
+        localStorage.setItem('wps_active_tab', hash);
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  // Auto route to dashboard after login if currently on login/register
+  useEffect(() => {
+    if (user && (currentTab === 'login' || currentTab === 'register')) {
+      setCurrentTab('dashboard');
+    }
+  }, [user]);
 
   if (loading) {
     return (

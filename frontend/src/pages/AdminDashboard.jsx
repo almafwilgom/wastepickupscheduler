@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { apiRequest } from '../services/api';
 import DashboardLayout from '../components/DashboardLayout';
 import PickupCard from '../components/PickupCard';
+import ProfileEditor from '../components/ProfileEditor';
 import { 
   ShieldCheck, Users, Truck, RefreshCw, Layers, 
   CheckCircle2, Clock, Sparkles, User, Settings, ArrowRight,
@@ -580,28 +581,10 @@ export default function AdminDashboard() {
       {activeTab === 'profile' && (
         <div className="max-w-2xl mx-auto space-y-6 text-left">
           <div>
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white">Dispatcher Profile</h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Your registered municipal dispatcher details.</p>
+            <h1 className="text-2xl font-black text-slate-900 dark:text-white">Admin Dispatcher Profile</h1>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Update your dispatcher contact details and profile picture.</p>
           </div>
-
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
-            <div className="flex items-center gap-5 pb-6 border-b border-slate-100 dark:border-slate-800">
-              <div className="w-16 h-16 rounded-full bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-800 flex items-center justify-center font-bold text-2xl">
-                {user?.name?.slice(0, 2).toUpperCase()}
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">{user?.name}</h3>
-                <span className="text-xs bg-purple-500/10 text-purple-700 dark:text-purple-400 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">{user?.role}</span>
-              </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-1">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email address</span>
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{user?.email}</p>
-              </div>
-            </div>
-          </div>
+          <ProfileEditor />
         </div>
       )}
 

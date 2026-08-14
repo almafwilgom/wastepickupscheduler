@@ -7,6 +7,7 @@ import {
   getCollectors,
   updateCollector,
   changePassword,
+  updateProfile,
 } from '../controllers/auth.controller.js';
 import { authenticateUser, authorizeRoles } from '../middleware/auth.middleware.js';
 
@@ -18,6 +19,8 @@ router.post('/login', loginUser);
 
 // Protected user routes
 router.get('/me', authenticateUser, getProfile);
+router.put('/profile', authenticateUser, updateProfile);
+router.patch('/profile', authenticateUser, updateProfile);
 router.post('/change-password', authenticateUser, changePassword);
 
 // Admin-only collector management routes

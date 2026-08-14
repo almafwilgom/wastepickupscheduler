@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { apiRequest } from '../services/api';
 import DashboardLayout from '../components/DashboardLayout';
 import PickupCard from '../components/PickupCard';
+import ProfileEditor from '../components/ProfileEditor';
 import { 
   Truck, RefreshCw, CheckCircle2, Clock, MapPin, 
   Sparkles, Leaf, Calendar, ArrowRight, User, Phone, Lock, AlertCircle, KeyRound, Shield
@@ -354,40 +355,10 @@ export default function CollectorDashboard() {
       {activeTab === 'profile' && (
         <div className="max-w-2xl mx-auto space-y-6 text-left">
           <div>
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white">Driver Profile</h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Your registered collector credentials.</p>
+            <h1 className="text-2xl font-black text-slate-900 dark:text-white">Collector Profile & Vehicle Info</h1>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Update your vehicle information, phone number, and profile picture.</p>
           </div>
-
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
-            <div className="flex items-center gap-5 pb-6 border-b border-slate-100 dark:border-slate-800">
-              <div className="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 flex items-center justify-center font-bold text-2xl">
-                {user?.name?.slice(0, 2).toUpperCase()}
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">{user?.name}</h3>
-                <span className="text-xs bg-blue-500/10 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">{user?.role}</span>
-              </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-1">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email address</span>
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{user?.email}</p>
-              </div>
-              <div className="space-y-1">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phone contact</span>
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{user?.phone || 'No phone'}</p>
-              </div>
-              <div className="space-y-1">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Vehicle Details</span>
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{user?.vehicleType || 'Truck'} ({user?.vehicleNumber || 'No plate'})</p>
-              </div>
-              <div className="space-y-1">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Assigned Zone</span>
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{user?.assignedArea || 'General Municipal Zone'}</p>
-              </div>
-            </div>
-          </div>
+          <ProfileEditor />
         </div>
       )}
 

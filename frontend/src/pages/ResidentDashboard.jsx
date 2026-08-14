@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { apiRequest } from '../services/api';
 import DashboardLayout from '../components/DashboardLayout';
 import PickupCard from '../components/PickupCard';
+import ProfileEditor from '../components/ProfileEditor';
 import { 
   Calendar, RefreshCw, CheckCircle2, Clock, Trash2, 
   Sparkles, Leaf, PlusCircle, ArrowRight, User, Phone, MapPin, 
@@ -593,38 +594,10 @@ export default function ResidentDashboard() {
       {activeTab === 'profile' && (
         <div className="max-w-2xl mx-auto space-y-6 text-left">
           <div>
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white">Your Resident Profile</h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Your registered details on the municipal portal.</p>
+            <h1 className="text-2xl font-black text-slate-900 dark:text-white">Your Profile & Avatar</h1>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Update your personal details, collection address, and profile picture.</p>
           </div>
-
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
-            <div className="flex items-center gap-5 pb-6 border-b border-slate-100 dark:border-slate-800">
-              <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 flex items-center justify-center font-bold text-2xl">
-                {user?.name?.slice(0, 2).toUpperCase()}
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">{user?.name}</h3>
-                <span className="text-xs bg-green-500/10 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">{user?.role}</span>
-              </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-1">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email address</span>
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{user?.email}</p>
-              </div>
-              <div className="space-y-1">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phone contact</span>
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{user?.phone || 'No phone provided'}</p>
-              </div>
-              <div className="space-y-1 md:col-span-2">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Default Collection Address</span>
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                  {user?.address?.street}, {user?.address?.city} {user?.address?.postalCode}
-                </p>
-              </div>
-            </div>
-          </div>
+          <ProfileEditor />
         </div>
       )}
 

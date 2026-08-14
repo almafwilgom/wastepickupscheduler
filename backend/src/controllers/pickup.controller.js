@@ -1,7 +1,7 @@
 import { PickupRequest } from '../models/PickupRequest.js';
 import { User } from '../models/User.js';
 import { Notification } from '../models/Notification.js';
-import { sendSMS } from '../services/sms.service.js';
+import { sendWhatsAppSMS } from '../services/sms.service.js';
 
 /**
  * Create a new pickup request (Resident)
@@ -280,19 +280,19 @@ export const markOnTheWay = async (req, res) => {
       smsNotificationResult.attempted = true;
       const smsMessage = 'Your Waste Pickup Scheduler collector is on the way to collect your waste. Please ensure your waste is ready.';
       
-      const smsRes = await sendSMS(pickup.resident.phone, smsMessage);
+      const smsRes = await sendWhatsAppSMS(pickup.resident.phone, smsMessage);
       if (smsRes.success) {
         pickup.smsStatus = 'SENT';
         smsNotificationResult.success = true;
-        smsNotificationResult.message = 'SMS sent successfully';
+        smsNotificationResult.message = 'WhatsApp/SMS alert sent successfully';
       } else {
         pickup.smsStatus = 'FAILED';
         smsNotificationResult.success = false;
-        smsNotificationResult.message = smsRes.message || 'SMS delivery failed';
+        smsNotificationResult.message = smsRes.message || 'WhatsApp/SMS delivery failed';
       }
       await pickup.save();
     } else if (pickup.smsStatus === 'SENT') {
-      smsNotificationResult.message = 'SMS notification was already sent previously';
+      smsNotificationResult.message = 'WhatsApp/SMS notification was already sent previously';
     } else if (!pickup.resident?.phone) {
       smsNotificationResult.message = 'Resident does not have a registered phone number';
     }
