@@ -1,4 +1,4 @@
-/* Service Worker for Waste Pickup Scheduler PWA & Mobile Push Notifications */
+/* Service Worker for Waste Pickup Scheduler PWA & Mobile Heads-Up Phone Bar Push Notifications */
 
 const CACHE_NAME = 'wps-cache-v1';
 
@@ -10,9 +10,13 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(clients.claim());
 });
 
-// Mobile Push Notification Event Handler
+// Mobile Push Notification Event Handler (Heads-up Phone Status Bar Banner)
 self.addEventListener('push', (event) => {
-  let data = { title: '🚛 Waste Pickup Notification', message: 'You have a new update regarding your waste pickup.' };
+  let data = { 
+    title: '🚛 Waste Pickup Scheduler', 
+    message: 'You have a new update regarding your waste pickup.' 
+  };
+
   if (event.data) {
     try {
       data = event.data.json();
@@ -22,18 +26,25 @@ self.addEventListener('push', (event) => {
   }
 
   const options = {
-    body: data.message || data.body,
+    body: data.message || data.body || 'New status update received',
     icon: '/logo.png',
     badge: '/logo.png',
-    vibrate: [200, 100, 200],
+    vibrate: [300, 100, 300, 100, 300],
+    tag: data.id ? 'wps-alert-' + data.id : 'wps-single-alert',
+    renotify: true,
+    requireInteraction: false,
+    silent: false,
+    timestamp: Date.now(),
     data: { url: data.url || '/#dashboard' },
-    actions: [{ action: 'open', title: 'View Dashboard' }],
+    actions: [
+      { action: 'open', title: 'Open Dashboard' }
+    ]
   };
 
-  event.waitUntil(self.registration.showNotification(data.title, options));
+  event.waitUntil(self.registration.showNotification(data.title || '🚛 Waste Pickup Scheduler', options));
 });
 
-// Handle Notification Click on Mobile & Desktop
+// Handle Notification Click on Mobile & Desktop status bar
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const urlToOpen = event.notification.data?.url || '/#dashboard';

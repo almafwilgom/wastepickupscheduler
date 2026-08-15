@@ -1,6 +1,6 @@
 /**
  * Mobile & Desktop Push Notification Helper
- * Uses Service Worker showNotification for Mobile Android/iOS compatibility.
+ * Delivers WhatsApp-style heads-up status bar notifications with deduplication.
  */
 
 let swRegistration = null;
@@ -33,24 +33,30 @@ export async function requestPushNotificationPermission() {
   }
 }
 
-export async function triggerPushNotification(title, message, icon = '/logo.png') {
+export async function triggerPushNotification(title, message, notificationId = null, icon = '/logo.png') {
   if (typeof window === 'undefined' || !('Notification' in window)) return;
 
   if (Notification.permission !== 'granted') {
     return;
   }
 
+  const tagId = notificationId ? `wps-alert-${notificationId}` : 'wps-single-alert';
+
   const options = {
     body: message,
     icon: icon,
     badge: icon,
-    vibrate: [200, 100, 200],
-    tag: 'wps-alert-' + Date.now(),
+    vibrate: [300, 100, 300, 100, 300],
+    tag: tagId,
     renotify: true,
+    requireInteraction: false,
+    silent: false,
+    timestamp: Date.now(),
+    data: { url: '/#dashboard' },
   };
 
   try {
-    // 1. Try Service Worker push notification (Required for Mobile Android/iOS)
+    // 1. Try Service Worker push notification (Required for Mobile Android/iOS Heads-up Status Bar Banner)
     if ('serviceWorker' in navigator) {
       const reg = swRegistration || (await navigator.serviceWorker.ready);
       if (reg && reg.showNotification) {

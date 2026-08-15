@@ -27,11 +27,14 @@ export default function DashboardLayout({ children, activeTab, setActiveTab }) {
       setNotifications(list);
 
       const latestUnread = list.find((n) => !n.isRead);
-      if (latestUnread && latestUnread._id !== lastNotifiedId) {
-        setLastNotifiedId(latestUnread._id);
+      const notifiedId = sessionStorage.getItem('wps_last_notified_id');
+
+      if (latestUnread && latestUnread._id !== notifiedId) {
+        sessionStorage.setItem('wps_last_notified_id', latestUnread._id);
         triggerPushNotification(
-          latestUnread.title || '🚛 Waste Pickup Notification',
-          latestUnread.message || 'You have a new update regarding your waste pickup.'
+          latestUnread.title || '🚛 Waste Pickup Scheduler',
+          latestUnread.message || 'You have a new update regarding your waste pickup.',
+          latestUnread._id
         );
       }
     } catch (err) {
