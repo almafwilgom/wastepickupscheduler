@@ -16,7 +16,7 @@ import { requestPushNotificationPermission } from './utils/pushNotification';
 
 function MainContent() {
   const { user, loading } = useAuth();
-  
+
   // Initialize route tab from URL hash or localStorage so refresh maintains page!
   const getInitialTab = () => {
     const hash = window.location.hash.replace('#', '').trim();
@@ -55,12 +55,18 @@ function MainContent() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  // Auto route to dashboard after login if currently on login/register
+  // Auto route logged-in users to dashboard upon page refresh if not on explicit public pages
   useEffect(() => {
-    if (user && (currentTab === 'login' || currentTab === 'register')) {
-      setCurrentTab('dashboard');
+    if (!loading && user) {
+      const hash = window.location.hash.replace('#', '').trim();
+      const publicTabs = ['about', 'services', 'contact'];
+      if (!publicTabs.includes(hash)) {
+        setCurrentTabState('dashboard');
+        window.location.hash = '#dashboard';
+        localStorage.setItem('wps_active_tab', 'dashboard');
+      }
     }
-  }, [user]);
+  }, [user, loading]);
 
   if (loading) {
     return (

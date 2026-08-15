@@ -263,10 +263,11 @@ export default function DashboardLayout({ children, activeTab, setActiveTab }) {
               <button
                 onClick={() => setIsNotificationOpen(!isNotificationOpen)}
                 className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all relative"
+                aria-label="Notifications"
               >
                 <Bell className="w-5 h-5" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-green-500 dark:bg-green-400 rounded-full border-2 border-white dark:border-slate-900 animate-pulse" />
+                  <span className="absolute top-1 right-1 w-3 h-3 bg-rose-500 rounded-full border-2 border-white dark:border-slate-900 animate-pulse shadow-md shadow-rose-500/50" />
                 )}
               </button>
 
@@ -274,12 +275,12 @@ export default function DashboardLayout({ children, activeTab, setActiveTab }) {
               {isNotificationOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setIsNotificationOpen(false)} />
-                  <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 py-3 overflow-hidden text-left animate-fade-in">
+                  <div className="fixed inset-x-4 top-16 sm:absolute sm:inset-auto sm:right-0 sm:mt-2 w-auto sm:w-80 max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-50 py-3 overflow-hidden text-left animate-fade-in">
                     <div className="px-4 pb-2 border-b border-slate-150 dark:border-slate-800 flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
                         <span className="font-bold text-xs">Recent Alerts</span>
                         {unreadCount > 0 && (
-                          <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">
+                          <span className="text-[10px] bg-rose-100 text-rose-600 dark:bg-rose-950 dark:text-rose-400 px-2 py-0.5 rounded-full font-extrabold">
                             {unreadCount} Unread
                           </span>
                         )}

@@ -133,7 +133,7 @@ export default function Navbar({ currentTab, setCurrentTab }) {
           </button>
 
           {user && (
-            <div className="relative hidden sm:flex">
+            <div className="relative flex">
               <button
                 onClick={toggleBellDropdown}
                 className="relative p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
@@ -141,14 +141,14 @@ export default function Navbar({ currentTab, setCurrentTab }) {
               >
                 <Bell className="w-5 h-5" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-4 px-1.5 text-[10px] font-bold leading-none text-white rounded-full bg-rose-500 flex items-center justify-center">
-                    {unreadCount}
-                  </span>
+                  <span className="absolute top-1 right-1 w-3 h-3 bg-rose-500 rounded-full border-2 border-white dark:border-slate-900 animate-pulse shadow-md shadow-rose-500/50" />
                 )}
               </button>
 
               {isBellOpen && (
-                <div className="absolute right-0 mt-3 w-80 max-w-xs rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xl shadow-slate-900/10 z-50 overflow-hidden text-left">
+                <>
+                  <div className="fixed inset-0 z-40" onClick={closeBellDropdown} />
+                  <div className="fixed inset-x-4 top-16 sm:absolute sm:inset-auto sm:right-0 sm:mt-3 w-auto sm:w-80 max-w-sm rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-2xl z-50 overflow-hidden text-left animate-fade-in">
                   <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
                     <span className="text-sm font-bold text-slate-900 dark:text-slate-100">Notifications</span>
                     {unreadCount > 0 && (
@@ -205,9 +205,10 @@ export default function Navbar({ currentTab, setCurrentTab }) {
                     View all notifications
                   </button>
                 </div>
-              )}
-            </div>
-          )}
+              </>
+            )}
+          </div>
+        )}
 
           <button
             onClick={toggleMenu}
