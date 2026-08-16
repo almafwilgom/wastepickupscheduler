@@ -102,6 +102,17 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleCancelPickup = async (pickupId) => {
+    try {
+      const res = await apiRequest(`/pickups/${pickupId}/cancel`, 'PUT', null, token);
+      setSuccessToast(res.message || 'Pickup request cancelled successfully');
+      fetchData();
+      setTimeout(() => setSuccessToast(''), 4000);
+    } catch (err) {
+      alert(`Failed to cancel pickup: ${err.message}`);
+    }
+  };
+
   const handleToggleCollectorActive = async (collectorId, currentActive) => {
     try {
       await apiRequest(`/auth/collectors/${collectorId}`, 'PATCH', { isActive: !currentActive }, token);
@@ -546,6 +557,7 @@ export default function AdminDashboard() {
                   userRole="ADMIN"
                   collectors={collectors}
                   onAssign={handleAssignCollector}
+                  onCancel={handleCancelPickup}
                 />
               ))}
             </div>

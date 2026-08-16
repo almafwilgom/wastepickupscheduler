@@ -46,8 +46,9 @@ export default function CollectorDashboard() {
       if (newStatus === 'ON_THE_WAY') endpoint = `/pickups/${pickupId}/on-the-way`;
       if (newStatus === 'COLLECTED') endpoint = `/pickups/${pickupId}/collected`;
       if (newStatus === 'COMPLETED') endpoint = `/pickups/${pickupId}/completed`;
+      if (newStatus === 'CANCELLED') endpoint = `/pickups/${pickupId}/cancel`;
 
-      const method = endpoint === `/pickups/${pickupId}/status` ? 'PUT' : 'PATCH';
+      const method = (endpoint === `/pickups/${pickupId}/status` || endpoint === `/pickups/${pickupId}/cancel`) ? 'PUT' : 'PATCH';
 
       const res = await apiRequest(endpoint, method, { status: newStatus }, token);
       
@@ -320,6 +321,7 @@ export default function CollectorDashboard() {
                   pickup={p}
                   userRole="COLLECTOR"
                   onStatusChange={handleStatusChange}
+                  onCancel={(id) => handleStatusChange(id, 'CANCELLED')}
                 />
               ))}
             </div>

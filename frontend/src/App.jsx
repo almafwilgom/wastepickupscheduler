@@ -35,10 +35,7 @@ function MainContent() {
     localStorage.setItem('wps_active_tab', tab);
   };
 
-  // Request push notification permissions on mount
-  useEffect(() => {
-    requestPushNotificationPermission();
-  }, []);
+
 
   // Listen for browser back/forward and hash changes
   useEffect(() => {

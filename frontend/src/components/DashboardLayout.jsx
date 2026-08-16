@@ -264,7 +264,13 @@ export default function DashboardLayout({ children, activeTab, setActiveTab }) {
             {/* Notification Bell Dropdown */}
             <div className="relative">
               <button
-                onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                onClick={() => {
+                  const nextState = !isNotificationOpen;
+                  setIsNotificationOpen(nextState);
+                  if (nextState && typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
+                    requestPushNotificationPermission(token);
+                  }
+                }}
                 className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all relative"
                 aria-label="Notifications"
               >

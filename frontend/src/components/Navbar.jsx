@@ -46,7 +46,15 @@ export default function Navbar({ currentTab, setCurrentTab }) {
 
   const closeMenu = () => setIsMenuOpen(false);
   const toggleMenu = () => setIsMenuOpen((value) => !value);
-  const toggleBellDropdown = () => setIsBellOpen((value) => !value);
+  const toggleBellDropdown = () => {
+    setIsBellOpen((value) => {
+      const nextState = !value;
+      if (nextState && typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
+        requestPushNotificationPermission(token);
+      }
+      return nextState;
+    });
+  };
   const closeBellDropdown = () => setIsBellOpen(false);
 
   const handleMarkAsRead = async (id) => {

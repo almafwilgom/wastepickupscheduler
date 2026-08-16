@@ -206,6 +206,36 @@ export const changePassword = async (req, res) => {
 };
 
 /**
+ * Subscribe authenticated user to Web Push lockscreen notifications
+ * Endpoint: POST /api/auth/subscribe-push
+ */
+export const subscribePush = async (req, res) => {
+  try {
+    const subscription = req.body;
+    if (!subscription || !subscription.endpoint) {
+      return res.status(400).json({ success: false, message: 'Invalid push subscription payload' });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    if (!user.pushSubscriptions) user.pushSubscriptions = [];
+
+    const exists = user.pushSubscriptions.some((sub) => sub.endpoint === subscription.endpoint);
+    if (!exists) {
+      user.pushSubscriptions.push(subscription);
+      await user.save();
+    }
+
+    return res.status(200).json({ success: true, message: 'Web push subscription registered successfully' });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Failed to subscribe push notification', error: error.message });
+  }
+};
+
+/**
  * Get current authenticated user profile
  */
 export const getProfile = async (req, res) => {

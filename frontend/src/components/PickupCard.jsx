@@ -1,7 +1,7 @@
 import React from 'react';
-import { Calendar, Clock, MapPin, Trash2, Truck, AlertTriangle, CheckCircle2, User, Phone, Navigation, Check } from 'lucide-react';
+import { Calendar, Clock, MapPin, Trash2, Truck, AlertTriangle, CheckCircle2, User, Phone, Navigation, Check, XCircle } from 'lucide-react';
 
-export default function PickupCard({ pickup, onStatusChange, onAssign, collectors = [], userRole }) {
+export default function PickupCard({ pickup, onStatusChange, onAssign, onCancel, collectors = [], userRole }) {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'PENDING':
@@ -49,15 +49,24 @@ export default function PickupCard({ pickup, onStatusChange, onAssign, collector
     year: 'numeric',
   });
 
-  // Filter available collectors to put them first in dropdown
   const sortedCollectors = [...collectors].sort((a, b) => {
     if (a.availabilityStatus === 'AVAILABLE' && b.availabilityStatus !== 'AVAILABLE') return -1;
     if (a.availabilityStatus !== 'AVAILABLE' && b.availabilityStatus === 'AVAILABLE') return 1;
     return 0;
   });
 
+  const handleCancelClick = () => {
+    if (window.confirm('Are you sure you want to cancel this waste pickup request?')) {
+      if (onCancel) {
+        onCancel(pickup._id);
+      } else if (onStatusChange) {
+        onStatusChange(pickup._id, 'CANCELLED');
+      }
+    }
+  };
+
   return (
-    <div className="glass-card rounded-2xl p-5 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-lg flex flex-col justify-between text-left">
+    <div className="glass-card rounded-2xl p-5 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-lg flex flex-col justify-between text-left relative">
       <div>
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="flex items-center gap-2">
@@ -126,16 +135,28 @@ export default function PickupCard({ pickup, onStatusChange, onAssign, collector
         </div>
       </div>
 
+      {/* Cancel Button for Resident */}
+      {userRole === 'RESIDENT' && pickup.status !== 'COMPLETED' && pickup.status !== 'CANCELLED' && (
+        <div className="pt-3 border-t border-slate-200 dark:border-slate-800">
+          <button
+            onClick={handleCancelClick}
+            className="w-full py-2 px-3 rounded-xl border border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 font-bold text-xs transition-all flex items-center justify-center gap-1.5"
+          >
+            <XCircle className="w-4 h-4" /> Cancel Pickup Request
+          </button>
+        </div>
+      )}
+
       {/* Action Controls for Admin */}
       {userRole === 'ADMIN' && pickup.status !== 'COMPLETED' && pickup.status !== 'CANCELLED' && (
-        <div className="pt-3 border-t border-slate-200 dark:border-slate-800">
+        <div className="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
           <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
             Assign Collector
           </label>
           <select
             onChange={(e) => onAssign && onAssign(pickup._id, e.target.value)}
             defaultValue={pickup.collector?._id || ''}
-            className="w-full text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-green-500 transition-colors"
+            className="w-full text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-green-500 transition-colors mb-2"
           >
             <option value="">Select Available Collector...</option>
             {sortedCollectors.map((c) => (
@@ -144,10 +165,16 @@ export default function PickupCard({ pickup, onStatusChange, onAssign, collector
               </option>
             ))}
           </select>
+          <button
+            onClick={handleCancelClick}
+            className="w-full py-2 px-3 rounded-xl border border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 font-bold text-xs transition-all flex items-center justify-center gap-1.5"
+          >
+            <XCircle className="w-4 h-4" /> Cancel Request (Admin)
+          </button>
         </div>
       )}
 
-      {/* Action Controls for Collector (Sequential Lifecycle) */}
+      {/* Action Controls for Collector */}
       {userRole === 'COLLECTOR' && pickup.status !== 'COMPLETED' && pickup.status !== 'CANCELLED' && (
         <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex flex-col gap-2">
           {pickup.status === 'ASSIGNED' && (
@@ -201,6 +228,13 @@ export default function PickupCard({ pickup, onStatusChange, onAssign, collector
               <CheckCircle2 className="w-4 h-4" /> Mark Final Completed
             </button>
           )}
+
+          <button
+            onClick={handleCancelClick}
+            className="w-full py-2 px-3 rounded-xl border border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 font-bold text-xs transition-all flex items-center justify-center gap-1.5 mt-1"
+          >
+            <XCircle className="w-4 h-4" /> Cancel Pickup (Collector)
+          </button>
         </div>
       )}
     </div>

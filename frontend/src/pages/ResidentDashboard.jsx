@@ -519,18 +519,12 @@ export default function ResidentDashboard() {
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {pickups.map((p) => (
-                <div key={p._id} className="relative group">
-                  <PickupCard pickup={p} userRole="RESIDENT" />
-                  {p.status === 'PENDING' && (
-                    <button
-                      onClick={() => handleCancelPickup(p._id)}
-                      className="absolute top-4 right-4 z-20 p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors"
-                      title="Cancel Request"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
+                <PickupCard 
+                  key={p._id} 
+                  pickup={p} 
+                  userRole="RESIDENT" 
+                  onCancel={handleCancelPickup}
+                />
               ))}
             </div>
           )}

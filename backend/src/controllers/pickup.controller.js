@@ -2,6 +2,7 @@ import { PickupRequest } from '../models/PickupRequest.js';
 import { User } from '../models/User.js';
 import { Notification } from '../models/Notification.js';
 import { sendWhatsAppSMS } from '../services/sms.service.js';
+import { sendWebPushNotification } from '../services/push.service.js';
 
 /**
  * Create a new pickup request (Resident)
@@ -421,19 +422,28 @@ export const updatePickupStatus = async (req, res) => {
 
     await pickup.save();
 
-    // Trigger Web Notification
+    // Trigger Web & Mobile Lockscreen Push Notification
+    const notifTitle = `Pickup Status: ${status.replace(/_/g, ' ')}`;
+    const notifMsg = `Your pickup request #${id.slice(-6)} status was updated to ${status.replace(/_/g, ' ')}.`;
     await Notification.create({
       user: pickup.resident._id,
       pickupId: pickup._id,
       type: `STATUS_${status}`,
-      title: `Pickup Status: ${status.replace(/_/g, ' ')}`,
-      message: `Your pickup request #${id.slice(-6)} status was updated to ${status.replace(/_/g, ' ')}.`,
+      title: notifTitle,
+      message: notifMsg,
     });
 
-    // If status changed to ON_THE_WAY, trigger SMS
+    sendWebPushNotification(pickup.resident._id, {
+      title: notifTitle,
+      message: notifMsg,
+      id: pickup._id.toString(),
+      url: '/#dashboard',
+    });
+
+    // If status changed to ON_THE_WAY, trigger WhatsApp SMS
     if (status === 'ON_THE_WAY' && pickup.smsStatus !== 'SENT' && pickup.resident?.phone) {
       const smsMessage = 'Your Waste Pickup Scheduler collector is on the way to collect your waste. Please ensure your waste is ready.';
-      const smsRes = await sendSMS(pickup.resident.phone, smsMessage);
+      const smsRes = await sendWhatsAppSMS(pickup.resident.phone, smsMessage);
       pickup.smsStatus = smsRes.success ? 'SENT' : 'FAILED';
       await pickup.save();
     }
@@ -445,7 +455,7 @@ export const updatePickupStatus = async (req, res) => {
 };
 
 /**
- * Cancel a pickup request (Resident or Admin)
+ * Cancel a pickup request (Resident, Collector, or Admin)
  * Endpoint: PUT or PATCH /api/pickups/:id/cancel
  */
 export const cancelPickupRequest = async (req, res) => {
@@ -457,27 +467,39 @@ export const cancelPickupRequest = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Pickup request not found' });
     }
 
-    // Ownership check for resident
-    if (req.user.role === 'RESIDENT' && pickup.resident.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ success: false, message: 'Not authorized to cancel this pickup request' });
-    }
-
     if (pickup.status === 'COMPLETED') {
       return res.status(400).json({ success: false, message: 'Completed pickups cannot be cancelled' });
+    }
+
+    // Role Security Ownership Check
+    if (req.user.role === 'RESIDENT' && pickup.resident.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'You are not authorized to cancel another resident\'s pickup request' });
+    }
+
+    if (req.user.role === 'COLLECTOR' && (!pickup.collector || pickup.collector.toString() !== req.user._id.toString())) {
+      return res.status(403).json({ success: false, message: 'You are not authorized to cancel a pickup not assigned to your route' });
     }
 
     pickup.status = 'CANCELLED';
     await pickup.save();
 
+    const cancelMsg = `Pickup request #${id.slice(-6)} was cancelled by ${req.user.role === 'ADMIN' ? 'Admin Dispatch' : req.user.role === 'COLLECTOR' ? 'Collector Driver' : 'Resident'}.`;
     await Notification.create({
       user: pickup.resident,
       pickupId: pickup._id,
       type: 'PICKUP_CANCELLED',
       title: 'Pickup Cancelled',
-      message: `Pickup request #${id.slice(-6)} has been cancelled.`,
+      message: cancelMsg,
     });
 
-    return res.status(200).json({ success: true, message: 'Pickup request cancelled', pickup });
+    sendWebPushNotification(pickup.resident, {
+      title: 'Pickup Cancelled',
+      message: cancelMsg,
+      id: pickup._id.toString(),
+      url: '/#dashboard',
+    });
+
+    return res.status(200).json({ success: true, message: 'Pickup request cancelled successfully', pickup });
   } catch (error) {
     return res.status(500).json({ success: false, message: 'Failed to cancel pickup request', error: error.message });
   }

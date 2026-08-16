@@ -8,6 +8,7 @@ import {
   updateCollector,
   changePassword,
   updateProfile,
+  subscribePush,
 } from '../controllers/auth.controller.js';
 import { authenticateUser, authorizeRoles } from '../middleware/auth.middleware.js';
 
@@ -22,6 +23,7 @@ router.get('/me', authenticateUser, getProfile);
 router.put('/profile', authenticateUser, updateProfile);
 router.patch('/profile', authenticateUser, updateProfile);
 router.post('/change-password', authenticateUser, changePassword);
+router.post('/subscribe-push', authenticateUser, subscribePush);
 
 // Admin-only collector management routes
 router.post('/collectors', authenticateUser, authorizeRoles('ADMIN'), createCollector);
