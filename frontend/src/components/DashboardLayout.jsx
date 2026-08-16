@@ -18,25 +18,13 @@ export default function DashboardLayout({ children, activeTab, setActiveTab }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [lastNotifiedId, setLastNotifiedId] = useState(null);
 
-  // Fetch notifications for the top bar bell
+  // Fetch notifications for the top bar bell (UI badge update only)
   const fetchNotifications = async () => {
     if (!token) return;
     try {
       const res = await apiRequest('/notifications', 'GET', null, token);
       const list = res.notifications || [];
       setNotifications(list);
-
-      const latestUnread = list.find((n) => !n.isRead);
-      const notifiedId = sessionStorage.getItem('wps_last_notified_id');
-
-      if (latestUnread && latestUnread._id !== notifiedId) {
-        sessionStorage.setItem('wps_last_notified_id', latestUnread._id);
-        triggerPushNotification(
-          latestUnread.title || '🚛 Waste Pickup Scheduler',
-          latestUnread.message || 'You have a new update regarding your waste pickup.',
-          latestUnread._id
-        );
-      }
     } catch (err) {
       console.warn('Failed to load notifications in topbar:', err.message);
     }

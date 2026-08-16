@@ -31,7 +31,7 @@ self.addEventListener('push', (event) => {
     badge: '/logo.png',
     vibrate: [300, 100, 300, 100, 300],
     tag: data.id ? 'wps-alert-' + data.id : 'wps-single-alert',
-    renotify: true,
+    renotify: false,
     requireInteraction: false,
     silent: false,
     timestamp: Date.now(),

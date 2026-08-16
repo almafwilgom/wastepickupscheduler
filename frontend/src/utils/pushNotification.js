@@ -86,7 +86,7 @@ export async function triggerPushNotification(title, message, notificationId = n
     badge: icon,
     vibrate: [300, 100, 300, 100, 300],
     tag: tagId,
-    renotify: true,
+    renotify: false,
     requireInteraction: false,
     silent: false,
     timestamp: Date.now(),
