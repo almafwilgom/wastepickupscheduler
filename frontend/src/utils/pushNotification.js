@@ -5,7 +5,7 @@
 
 import { apiRequest } from '../services/api';
 
-const VAPID_PUBLIC_KEY = 'BEl62iUYgUivxIkv69yViEuiBIa-m3A1O8M4H3Hw4H9q0xH9Q2wK2E4R2Y2U2I2O2P2L2K2J2H2G2F2D2S2A';
+const VAPID_PUBLIC_KEY = 'BCe7YzXRpyHCuG9HO_Jo-tB-AXsCtgWZxi7Ae-3o88nGxaoS4rxH11EO2KUNc8muNLxr9hWiyBxcNPUcExbJ0io';
 
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);

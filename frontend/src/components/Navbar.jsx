@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { apiRequest } from '../services/api';
 import { LogOut, Bell, Sun, Moon, LayoutDashboard, Truck, ShieldCheck, Menu, X, CheckCheck } from 'lucide-react';
+import { requestPushNotificationPermission } from '../utils/pushNotification';
 
 export default function Navbar({ currentTab, setCurrentTab }) {
   const { user, token, logout } = useAuth();

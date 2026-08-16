@@ -1,9 +1,9 @@
 import webpush from 'web-push';
 import { User } from '../models/User.js';
 
-// VAPID keys for Web Push Service
-const publicVapidKey = process.env.VAPID_PUBLIC_KEY || 'BEl62iUYgUivxIkv69yViEuiBIa-m3A1O8M4H3Hw4H9q0xH9Q2wK2E4R2Y2U2I2O2P2L2K2J2H2G2F2D2S2A';
-const privateVapidKey = process.env.VAPID_PRIVATE_KEY || 'vK3F3D3S3A3Z3X3C3V3B3N3M3K3J3H3G3F3D3S3A';
+// VAPID keys for Web Push Service (real keys in .env)
+const publicVapidKey = process.env.VAPID_PUBLIC_KEY || 'BCe7YzXRpyHCuG9HO_Jo-tB-AXsCtgWZxi7Ae-3o88nGxaoS4rxH11EO2KUNc8muNLxr9hWiyBxcNPUcExbJ0io';
+const privateVapidKey = process.env.VAPID_PRIVATE_KEY || 'i4BwahkkXq7Gi07yVvaeoposH7FgQ9E7B7RycgWXajA';
 
 try {
   webpush.setVapidDetails(
@@ -19,16 +19,18 @@ export async function sendWebPushNotification(userId, payloadData) {
   try {
     const user = await User.findById(userId);
     if (!user || !user.pushSubscriptions || user.pushSubscriptions.length === 0) {
+      console.log('[Push Service] No push subscriptions for user:', userId);
       return;
     }
 
     const payload = JSON.stringify({
       title: payloadData.title || '🚛 Waste Pickup Scheduler',
+      message: payloadData.message || payloadData.body || 'You have a new waste pickup status update.',
       body: payloadData.message || payloadData.body || 'You have a new waste pickup status update.',
       icon: '/logo.png',
       badge: '/logo.png',
       url: payloadData.url || '/#dashboard',
-      id: payloadData.id || Date.now(),
+      id: payloadData.id ? String(payloadData.id) : String(Date.now()),
     });
 
     const activeSubscriptions = [];
@@ -36,17 +38,19 @@ export async function sendWebPushNotification(userId, payloadData) {
       try {
         await webpush.sendNotification(sub, payload);
         activeSubscriptions.push(sub);
+        console.log('[Push Service] ✅ Sent push to:', sub.endpoint?.slice(0, 60));
       } catch (err) {
         if (err.statusCode === 410 || err.statusCode === 404) {
-          // Subscription expired or invalid
-          console.log('[Push Service] Expired subscription removed:', sub.endpoint);
+          // Subscription expired or invalid – drop it silently
+          console.log('[Push Service] Expired subscription removed:', sub.endpoint?.slice(0, 60));
         } else {
           console.warn('[Push Service] Web push send error:', err.message);
-          activeSubscriptions.push(sub);
+          activeSubscriptions.push(sub); // keep it, might be transient
         }
       }
     }
 
+    // Persist cleaned subscription list
     if (activeSubscriptions.length !== user.pushSubscriptions.length) {
       user.pushSubscriptions = activeSubscriptions;
       await user.save();

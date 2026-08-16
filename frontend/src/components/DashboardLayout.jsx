@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { apiRequest } from '../services/api';
@@ -7,7 +7,7 @@ import {
   LogOut, Menu, Search, X, Shield, Truck, Sparkles, Sun, Moon, CheckCheck 
 } from 'lucide-react';
 
-import { triggerPushNotification } from '../utils/pushNotification';
+import { triggerPushNotification, requestPushNotificationPermission } from '../utils/pushNotification';
 
 export default function DashboardLayout({ children, activeTab, setActiveTab }) {
   const { user, logout, token } = useAuth();
@@ -17,14 +17,29 @@ export default function DashboardLayout({ children, activeTab, setActiveTab }) {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [lastNotifiedId, setLastNotifiedId] = useState(null);
+  // Ref-based dedup guard: tracks last notification ID that triggered a push alert
+  const lastNotifiedIdRef = useRef(null);
 
-  // Fetch notifications for the top bar bell (UI badge update only)
+  // Fetch notifications for the top bar bell + trigger push alert exactly once per new notification
   const fetchNotifications = async () => {
     if (!token) return;
     try {
       const res = await apiRequest('/notifications', 'GET', null, token);
       const list = res.notifications || [];
       setNotifications(list);
+
+      // Find the newest unread notification
+      const latestUnread = list.find((n) => !n.isRead);
+      if (latestUnread && latestUnread._id !== lastNotifiedIdRef.current) {
+        // Update the ref FIRST to prevent any race condition re-triggering
+        lastNotifiedIdRef.current = latestUnread._id;
+        // Fire push alert exactly once for this notification ID
+        triggerPushNotification(
+          latestUnread.title || '🚛 Waste Pickup Scheduler',
+          latestUnread.message || 'You have a new update regarding your waste pickup.',
+          latestUnread._id
+        );
+      }
     } catch (err) {
       console.warn('Failed to load notifications in topbar:', err.message);
     }
