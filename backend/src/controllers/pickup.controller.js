@@ -51,6 +51,18 @@ export const createPickupRequest = async (req, res) => {
   }
 };
 
+// Helper function to sort uncompleted pickups at the top
+const sortUncompletedFirst = (list) => {
+  const isUncompleted = (status) => status !== 'COMPLETED' && status !== 'CANCELLED';
+  return list.sort((a, b) => {
+    const aActive = isUncompleted(a.status);
+    const bActive = isUncompleted(b.status);
+    if (aActive && !bActive) return -1;
+    if (!aActive && bActive) return 1;
+    return new Date(b.createdAt) - new Date(a.createdAt);
+  });
+};
+
 /**
  * Get all pickup requests for authenticated Resident or Collector
  * Endpoint: GET /api/pickups/my-pickups or GET /api/pickups/my
@@ -66,10 +78,12 @@ export const getMyPickups = async (req, res) => {
       query = {}; // Admin sees all
     }
 
-    const pickups = await PickupRequest.find(query)
+    const rawPickups = await PickupRequest.find(query)
       .populate('resident', 'name email phone address')
       .populate('collector', 'name email phone vehicleType vehicleNumber availabilityStatus')
       .sort({ createdAt: -1 });
+
+    const pickups = sortUncompletedFirst(rawPickups);
 
     return res.status(200).json({ success: true, pickups });
   } catch (error) {
@@ -83,9 +97,11 @@ export const getMyPickups = async (req, res) => {
  */
 export const getCollectorAssignedPickups = async (req, res) => {
   try {
-    const pickups = await PickupRequest.find({ collector: req.user._id })
+    const rawPickups = await PickupRequest.find({ collector: req.user._id })
       .populate('resident', 'name email phone address')
       .sort({ scheduledDate: 1, createdAt: -1 });
+
+    const pickups = sortUncompletedFirst(rawPickups);
 
     return res.status(200).json({ success: true, pickups });
   } catch (error) {
@@ -129,10 +145,12 @@ export const getPickupById = async (req, res) => {
  */
 export const getAllPickups = async (req, res) => {
   try {
-    const pickups = await PickupRequest.find()
+    const rawPickups = await PickupRequest.find()
       .populate('resident', 'name email phone address')
       .populate('collector', 'name email phone vehicleType vehicleNumber availabilityStatus')
       .sort({ createdAt: -1 });
+
+    const pickups = sortUncompletedFirst(rawPickups);
 
     return res.status(200).json({ success: true, pickups });
   } catch (error) {

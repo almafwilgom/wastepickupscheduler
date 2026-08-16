@@ -44,7 +44,7 @@ export default function DashboardLayout({ children, activeTab, setActiveTab }) {
 
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 15000); // Poll every 15s
+    const interval = setInterval(fetchNotifications, 1000); // Instant poll every 1s
     return () => clearInterval(interval);
   }, [token]);
 

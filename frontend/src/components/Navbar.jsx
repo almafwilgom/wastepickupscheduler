@@ -37,7 +37,7 @@ export default function Navbar({ currentTab, setCurrentTab }) {
     }
 
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 15000);
+    const interval = setInterval(fetchNotifications, 1000);
     return () => {
       isMounted = false;
       clearInterval(interval);
